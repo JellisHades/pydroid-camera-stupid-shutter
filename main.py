@@ -1,22 +1,18 @@
-import pygame
-import threading
+from datetime import datetime as Date
+from jnius import autoclass
 import pygame.image
 import threading
-from datetime import datetime as Date
+import pygame
 import cv2
 import re
 import os
 
-cv2.CAP_PROP_BUFFERSIZE = 1
-
 FrameRate = 50
-
 CameraNum = 0
-Camera = cv2.VideoCapture(CameraNum)
 
+Camera = cv2.VideoCapture(CameraNum)
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 clock = pygame.time.Clock()
-
 pygame.init()
 
 ProjectPath = "/storage/emulated/0/Projects/Assets"
@@ -32,6 +28,9 @@ Color = False
 CoveredYStart = 0
 CoveredYSize = 100
 LastFrame = None
+
+Python = autoclass('org.kivy.android.PythonActivity')
+MediaScannerConnection = autoclass('android.media.MediaScannerConnection')
 
 while True:
 	FlipPos = (100, int(ScreenSize[1] * 0.86))
@@ -52,8 +51,8 @@ while True:
 			FilePath = os.path.join(ProjectPath, f'IMG{re.sub(r'[ .:-]', '', str(Date.now()))}.jpg')
 			
 			cv2.imwrite(FilePath, LastFrame)
-			os.system(f'am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file://{FilePath}')
-		
+			MediaScannerConnection.scanFile(Python.mActivity, [FilePath], None, None)
+			# media scanner so it shows on gallery app
 	IsInFlicker = HoldingMouse
 	Color = (IsInFlicker and not Color) or False
 	
